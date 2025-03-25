@@ -1,4 +1,4 @@
-# WordPress GitHub Updater
+# IP WordPress GitHub Updater
 
 Система автоматичного оновлення WordPress плагінів через GitHub релізи.
 
