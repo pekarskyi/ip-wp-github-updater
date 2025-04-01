@@ -2,6 +2,8 @@
 
 Система автоматичного оновлення WordPress плагінів через GitHub релізи.
 
+![https://github.com/pekarskyi/assets/raw/master/ip-wp-github-updater/ip-get-logger_update-plugin.jpg](https://github.com/pekarskyi/assets/raw/master/ip-wp-github-updater/ip-get-logger_update-plugin.jpg)
+
 ## Опис
 
 Цей інструмент дозволяє автоматизувати оновлення ваших WordPress плагінів безпосередньо з GitHub. Система автоматично перевіряє наявність нових релізів у вашому GitHub репозиторії та пропонує оновлення через стандартний інтерфейс WordPress.
