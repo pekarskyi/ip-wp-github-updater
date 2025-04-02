@@ -1,36 +1,53 @@
 # IP WordPress GitHub Updater
 
-Система автоматичного оновлення WordPress плагінів через GitHub релізи.
+Система оновлення плагінів WordPress через релізи GitHub.
 
 ![https://github.com/pekarskyi/assets/raw/master/ip-wp-github-updater/ip-get-logger_update-plugin.jpg](https://github.com/pekarskyi/assets/raw/master/ip-wp-github-updater/ip-get-logger_update-plugin.jpg)
 
 ## Опис
 
-Цей інструмент дозволяє автоматизувати оновлення ваших WordPress плагінів безпосередньо з GitHub. Система автоматично перевіряє наявність нових релізів у вашому GitHub репозиторії та пропонує оновлення через стандартний інтерфейс WordPress.
+Цей інструмент дозволяє автоматизувати оновлення ваших плагінів WordPress безпосередньо з GitHub. Система автоматично перевіряє наявність нових релізів у вашому GitHub репозиторії та пропонує оновлення через стандартний інтерфейс WordPress.
 
 ## Інсталяція
 
-1. Скопіюйте директорію `updates` з файлом `github-updater.php` до вашого плагіну.
-2. В файлі `github-updater.php`, в рядку 24: `$prefix = 'IP_WOO_CLEANER';` вкажіть унікальний префікс (можна в нижньому регістрі)
-3. Підключіть файл у головному файлі вашого плагіну.
-
-### Основне підключення
-
-Додайте наступний код у головний файл вашого плагіну:
+1. Скопіюйте директорію `updates` в папку вашого плагіну.
+2. Додайте наступний код у головний файл вашого плагіну (наприклад, десь в кінець файлу):
 
 ```php
 // Adding update check via GitHub
 require_once plugin_dir_path( __FILE__ ) . 'updates/github-updater.php';
-if ( function_exists( 'ip_woo_cleaner_github_updater_init' ) ) {
-    ip_woo_cleaner_github_updater_init(
-        __FILE__,       // Plugin file path
-        'pekarskyi',     // Your GitHub username
-        '',              // Access token (empty)
-        'ip-woo-cleaner' // Repository name (optional)
-        // Other parameters are determined automatically
-    );
+
+$github_username = 'github_username'; // Вказуємо ім'я користувача GitHub
+$repo_name = 'repo_name'; // Вказуємо ім'я репозиторію GitHub, наприклад ip-wp-github-updater
+$prefix = 'your_prefix'; // Встановлюємо унікальний префікс плагіну, наприклад ip_wp_github_updater
+
+// Ініціалізуємо систему оновлення плагіну з GitHub
+if ( function_exists( 'ip_github_updater_load' ) ) {
+    // Завантажуємо файл оновлювача з нашим префіксом
+    ip_github_updater_load($prefix);
+    
+    // Формуємо назву функції оновлення з префіксу
+    $updater_function = $prefix . '_github_updater_init';   
+    
+    // Після завантаження наша функція оновлення повинна бути доступна
+    if ( function_exists( $updater_function ) ) {
+        call_user_func(
+            $updater_function,
+            __FILE__,       // Plugin file path
+            $github_username, // Your GitHub username
+            '',              // Access token (empty)
+            $repo_name       // Repository name (на основі префіксу)
+        );
+    }
 } 
 ```
+(Код функції продублював також в файлі func_connect.php)
+
+Змініть ці дані на власні:
+
+- `$github_username = 'github_username';` - вкажіть ім'я користувача GitHub
+- `$repo_name = 'repo_name';` - вкажіть ім'я репозиторію GitHub, наприклад ip-wp-github-updater
+- `$prefix = 'your_prefix';` - вкажіть унікальний префікс плагіну, наприклад ip_wp_github_updater
 
 ## Вказування версії плагіну
 
@@ -48,16 +65,12 @@ if ( function_exists( 'ip_woo_cleaner_github_updater_init' ) ) {
    - Рекомендується використовувати [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
    - Приклад: `1.0.0`, `1.2.3`, `2.0.0`
 
-3. **Синхронізація з тегами GitHub**:
-   - Створюйте теги в GitHub з такими ж версіями, як у плагіні
-   - Система підтримує префікс `v` в тегах GitHub (наприклад, `v1.0.0`)
+3. **Узгодження версій**:
+   - Версія в шапці плагіну повинна відповідати версії у внутрішніх константах/змінних. Оновіть версію у всіх місцях коду перед створенням нового релізу.
 
-4. **Узгодження версій**:
-   - Версія в шапці плагіну повинна відповідати версії у внутрішніх константах/змінних
-   - Оновіть версію у всіх місцях коду перед створенням нового релізу
+Приклад узгодження версій в файлах вашого плагіну:
 
 ```php
-// Приклад узгодження версій
 class My_Plugin {
     private $version;
     
@@ -84,4 +97,4 @@ class My_Plugin {
 
 ## Обмеження використання API GitHub
 
-GitHub має обмеження на кількість запитів до API. Для публічних репозиторіїв ліміт становить 60 запитів на годину з однієї IP-адреси. Для збільшення ліміту можна використати GitHub API token. 
+GitHub має обмеження на кількість запитів до API. Для публічних репозиторіїв ліміт становить `60 запитів на годину з однієї IP-адреси`. Для збільшення ліміту можна використати GitHub API token. 
