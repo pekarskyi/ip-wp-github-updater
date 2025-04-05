@@ -1,103 +1,113 @@
 # IP WordPress GitHub Updater
 
-Система оновлення плагінів WordPress через релізи GitHub.
+A WordPress plugin update system via GitHub releases. This works only for public releases.
 
 ![https://github.com/pekarskyi/assets/raw/master/ip-wp-github-updater/ip-get-logger_update-plugin.jpg](https://github.com/pekarskyi/assets/raw/master/ip-wp-github-updater/ip-get-logger_update-plugin.jpg)
 
-## Опис
+## Description
 
-Цей інструмент дозволяє автоматизувати оновлення ваших плагінів WordPress безпосередньо з GitHub. Система автоматично перевіряє наявність нових релізів у вашому GitHub репозиторії та пропонує оновлення через стандартний інтерфейс WordPress.
+This tool allows you to automate the updating of your WordPress plugins directly from GitHub. The system automatically checks for new releases in your GitHub repository and offers updates through the standard WordPress interface.
 
-## Інсталяція
+## Installation
 
-1. Скопіюйте директорію `updates` в папку вашого плагіну.
-2. Додайте наступний код у головний файл вашого плагіну (наприклад, десь в кінець файлу):
+1. Copy the `updates` directory into your plugin folder.
+2. Add the following code to the main file of your plugin (for example, somewhere at the end of the file):
 
 ```php
 // Adding update check via GitHub
 require_once plugin_dir_path( __FILE__ ) . 'updates/github-updater.php';
 
-$github_username = 'github_username'; // Вказуємо ім'я користувача GitHub
-$repo_name = 'repo_name'; // Вказуємо ім'я репозиторію GitHub, наприклад ip-wp-github-updater
-$prefix = 'your_prefix'; // Встановлюємо унікальний префікс плагіну, наприклад ip_wp_github_updater
+$github_username = 'github_username'; // Specify your GitHub username
+$repo_name = 'repo_name'; // Specify your GitHub repository name, for example ip-wp-github-updater
+$prefix = 'your_prefix'; // Set a unique plugin prefix, for example ip_wp_github_updater
 
-// Ініціалізуємо систему оновлення плагіну з GitHub
+// Initialize the GitHub plugin update system
 if ( function_exists( 'ip_github_updater_load' ) ) {
-    // Завантажуємо файл оновлювача з нашим префіксом
+    // Load the updater file with our prefix
     ip_github_updater_load($prefix);
     
-    // Формуємо назву функції оновлення з префіксу
+    // Create the update function name from the prefix
     $updater_function = $prefix . '_github_updater_init';   
     
-    // Після завантаження наша функція оновлення повинна бути доступна
+    // After loading, our update function should be available
     if ( function_exists( $updater_function ) ) {
         call_user_func(
             $updater_function,
             __FILE__,       // Plugin file path
             $github_username, // Your GitHub username
-            '',              // Access token (empty)
-            $repo_name       // Repository name (на основі префіксу)
+            $repo_name       // Repository name (based on prefix)
         );
     }
 } 
 ```
-(Код функції продублював також в файлі func_connect.php)
+(The function code is also duplicated in the func_connect.php file)
 
-Змініть ці дані на власні:
+Change these values to your own:
 
-- `$github_username = 'github_username';` - вкажіть ім'я користувача GitHub
-- `$repo_name = 'repo_name';` - вкажіть ім'я репозиторію GitHub, наприклад ip-wp-github-updater
-- `$prefix = 'your_prefix';` - вкажіть унікальний префікс плагіну, наприклад ip_wp_github_updater
+- `$github_username = 'github_username';` - specify your GitHub username
+- `$repo_name = 'repo_name';` - specify your GitHub repository name, for example ip-wp-github-updater
+- `$prefix = 'your_prefix';` - specify a unique plugin prefix, for example ip_wp_github_updater
 
-На цьому підключення системи оновлення для вашого плагіну завершено.
-Далі, ви можете створити нову версію плагіну і завантажити її на GitHub. Читайте далі рекомендації щодо версіонування.
+With this, the update system connection for your plugin is complete.
 
-## Вказування версії плагіну
+Next, you can create a new version of the plugin and upload it to GitHub.
 
-### Рекомендації щодо версіонування
+Read on for versioning recommendations.
 
-1. **Завжди вказуйте версію плагіну в шапці головного файлу**:
+## Setting Plugin Version
+
+### Versioning Recommendations
+
+1. **Always specify the plugin version in the header of the main file**:
    ```php
    /**
-    * Plugin Name: Назва Плагіну
+    * Plugin Name: Plugin Name
     * Version: 1.0.0
     */
    ```
 
-2. **Формат версіонування**:
-   - Рекомендується використовувати [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
-   - Приклад: `1.0.0`, `1.2.3`, `2.0.0`
+2. **Versioning Format**:
+   - It is recommended to use [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
+   - Example: `1.0.0`, `1.2.3`, `2.0.0`
 
-3. **Узгодження версій**:
-   - Версія в шапці плагіну повинна відповідати версії у внутрішніх константах/змінних. Оновіть версію у всіх місцях коду перед створенням нового релізу.
+3. **Version Consistency**:
+   - The version in the plugin header should match the version in internal constants/variables. Update the version in all places in your code before creating a new release.
 
-Приклад узгодження версій в файлах вашого плагіну:
+Example of version consistency in your plugin files:
 
 ```php
 class My_Plugin {
     private $version;
     
     public function __construct() {
-        // Отримуємо версію з шапки плагіну для уникнення розбіжностей
+        // Get the version from the plugin header to avoid discrepancies
         $plugin_data = get_plugin_data( __FILE__ );
         $this->version = $plugin_data['Version'];
     }
 }
 ```
 
-## Створення релізів у GitHub
+## Creating GitHub Releases
 
-1. Створіть новий реліз/тег у вашому GitHub репозиторії
-2. Використовуйте той самий номер версії, що й у шапці плагіну (можна з префіксом `v`)
-3. Додайте опис змін у полі "Release notes" - ця інформація відображатиметься як changelog
-4. Опціонально: завантажте готовий ZIP-архів плагіну як asset для релізу
+1. Create a new release/tag in your GitHub repository
+2. Use the same version number as in the plugin header (optionally with a `v` prefix)
+3. Add a description of changes in the "Release notes" field - this information will be displayed as a changelog
+4. Optional: Upload a ready-made ZIP archive of the plugin as an asset for the release
 
-## Можливі проблеми та рішення
+## Potential Issues and Solutions
 
-- **Не з'являється сповіщення про оновлення**: переконайтесь, що тег у GitHub має вищу версію, ніж у плагіні
-- **Помилка при оновленні**: перевірте права доступу для директорії плагіну на сервері
-- **Невідповідність структури директорій**: переконайтесь, що структура директорій у GitHub архіві відповідає структурі плагіну
+- **Update notification doesn't appear**: Ensure that the tag in GitHub has a higher version than in the plugin
+- **Error during update**: Check access permissions for the plugin directory on the server
+- **Directory structure mismatch**: Make sure the directory structure in the GitHub archive matches the plugin structure
 
-## Обмеження використання API GitHub
+## GitHub API Usage Limitations
 
-GitHub має обмеження на кількість запитів до API. Для публічних репозиторіїв ліміт становить `60 запитів на годину з однієї IP-адреси`. Для збільшення ліміту можна використати GitHub API token. 
+GitHub has limits on the number of API requests. For public repositories, the limit is `60 requests per hour from a single IP address`. To increase this limit, you can use a GitHub API token. 
+
+## Changelog
+
+1.1.0 (05-04-2025):
+- Improved and optimized version
+
+1.0.0 (01-04-2025):
+- Initial release
